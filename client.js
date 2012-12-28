@@ -53,12 +53,14 @@ Meteor.AngularCollection = function(name, $scope) {
 		self.collection = Meteor._LocalCollectionDriver.collections[self.name];
 		Meteor.AngularCollectionHolder[self.name] = self.collection;
 	}
-	self.find = function(selector) {
-		query = self.collection.find(selector);
+	self.find = function(selector, options) {
+		options = options || {};
+		query = self.collection.find(selector, options);
 		return new angularObjectCollection(self.$scope, self.name, query, selector);
 	}
-	self.findOne = function(selector) {
-		query = self.collection.find(selector);
+	self.findOne = function(selector, options) {
+		options = options || {};
+		query = self.collection.findOne(selector, options);
 		return new angularObjectCollection(self.$scope, self.name, query, selector, true);
 	}
 	self.insert = function(object) {
@@ -105,6 +107,7 @@ var angularObjectCollection = function($scope, name, query, selector, single) {
 				} else {
 					var temp = new angularObject(self.name, query.collection.docs[i], $scope);
 					self.value.push(temp);
+					self.value.sort(self.query.sort_f);
 				}
 				$scope.$digest();
 			}
@@ -133,6 +136,7 @@ var angularObjectCollection = function($scope, name, query, selector, single) {
 				var temp = new angularObject(self.name, object, self.$scope);
 				if (_.indexOf(self.value, temp, true) == -1) {
 					self.value.push(temp);
+					self.value.sort(self.query.sort_f);
 				}
 			}
 			if (!$scope.$$phase)
